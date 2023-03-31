@@ -8,7 +8,7 @@
 bl_info = {  
     "name": "Import Flatout 2 & UC trackai.bin",  
     "author": "Mazay",  
-    "version": (0, 1),  
+    "version": (0, 2),  
     "blender": (2, 80, 0),  
     "location": "File > Import",  
     "description": "Import trackai.bin. Still work in progress, exports are not possible.",  
@@ -355,7 +355,7 @@ def make_checkpoints(get):
 
         # Simple plane
         faces = ((0,1,2,3),)
-        verts = ((LX,LY,LZ), (RX,RY,RZ), (RX,RY,(RZ-50)), (LX,LY,(LZ-50)))
+        verts = ((LX,LY,LZ+25), (RX,RY,RZ+25), (RX,RY,RZ-25), (LX,LY,LZ-25))
         create_mesh_ob("#checkpoint",verts,faces,"checkpoint", collection="Checkpoints")
     get.checkHeader('76 09 02 00') # End
 
