@@ -1,0 +1,102 @@
+
+# trackai.bin:
+
+Endian: Little
+
+No. Format		Description		Value
+
+#### Race and Safe Routes ####
+1. Start-Header "76 02 27 00"
+2. Integer		No. Ai routes
+
+	#### Ai Route ####
+	1. Header "76 02 29 00"
+	2. Integer		No. Ai sectors
+	
+		#### Ai Sector ####
+		1. Start-Header "76 02 23 00"
+		2. Integer		Sector number			1, 2, 3...
+		3. Integer		?				0
+		4. Integer		Last sector no.			75, 0, 1....
+		5. Integer		?				0
+		6. Float x3		Normal X,Z,Y			between 1 and -1
+		9. Float x3		Normal X,Z,Y			between 1 and -1
+		12. Float x3		Normal X,Z,Y			between 1 and -1
+		15. Float x3		Route Left vert X,Z,Y
+		18. Float x3		Route Right vert X,Z,Y
+		21. Float x3		Route Safe Left vert X,Z,Y
+		24. Float x3		Route Safe Right vert X,Z,Y
+		27. Float x3		Optimal raceline vert X,Z,Y
+		30. Float x3		Normal X,Z,Y			between 1 and -1
+		33. Float x3		Normal X,Z,Y			between 1 and -1
+		36. Float x3		Normal X,Z,Y			between 1 and -1
+		39. Float		?				Unknown updown changes in value
+		40. Float		?				Unknown updown changes in value
+		41. Float		Distance elapsed		0, 16, 36 ...
+		42. Integer		?				-1082130432, rarely 1122369536
+		43. Integer		?				Varying Up-down value
+		44. Integer		?				0 or -1
+		45. Integer		?				-1
+		46. Integer		?				Varying Up-down value, Identical to No. 43
+		44. Integer		?				0 or 1
+		48. Integer		Sector no.			0, 1, 2 ...
+		49. Integer		?				0
+		50. Integer		?				Usually -1, rarely 0
+		51. Integer		?				0
+		52. End-Header "76 02 24 00"
+	3. Integer		?				0, 1, 1
+	4. Integer		?				1056964608
+	5. Integer		?				0
+	6. Integer		?				0
+	7. Integer		?				2
+	8. Header "76 02 26 00"	
+
+
+1. Start-Header "76 08 28 00"
+
+#### Startpoints ####
+1. Start-Header "76 08 30 00"
+2. Integer		No. Startpoints
+	1. Float x3		Position X,Z,Y
+	2. Float x9		3x3 Transform matrix
+3. End-Header "76 08 31 00"
+	
+#### Checkpoints ####	
+1. Start-Header "76 09 01 00"
+2. Integer		No. Checkpoints
+	1. Float x3		Center coordinate X,Z,Y
+	2. Float x3		Left coordinate X,Z,Y
+	3. Float x3		Right coordinate X,Z,Y
+3. End-Header "76 09 02 00"
+
+1. End-Header "76 08 29 00"
+
+#### Combined Main Route sectors (widest route) ####
+1. Header "76 02 29 00"
+2. Integer		No. Main Route combined sectors
+3. Header "76 03 02 00"
+4. Integer		?				0
+	1. Integer		?
+	2. Float x3		Left Position X,Z,Y
+	3. Float x3		Right Position X,Z,Y
+	4. Integer		?
+
+#### Unknown list of 2 values ####
+1. Header "76 03 03 00"
+2. Integer		No. Unknown
+3. Integer		?
+	1. Integer		?
+	2. Integer		?
+	
+1. Header "76 03 05 00"
+1. Header "76 03 01 00"
+
+1. End-Header "76 02 28 00"
+
+	
+
+	
+	
+	
+		
+		
