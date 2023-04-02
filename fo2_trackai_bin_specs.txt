@@ -5,7 +5,7 @@ Endian: Little
 
 No. Format		Description		Value
 
-#### Race and Safe Routes ####
+#### Ai routes ####
 1. Start-Header "76 02 27 00"
 2. Integer		No. Ai routes
 
@@ -13,7 +13,7 @@ No. Format		Description		Value
 	1. Header "76 02 29 00"
 	2. Integer		No. Ai sectors
 	
-		#### Ai Sector ####
+		#### Ai Sector (Race and Safe Lines) ####
 		1. Start-Header "76 02 23 00"
 		2. Integer		Sector number			1, 2, 3...
 		3. Integer		?				0
@@ -71,15 +71,16 @@ No. Format		Description		Value
 
 1. End-Header "76 08 29 00"
 
-#### Combined Main Route sectors (widest route) ####
+#### Widest Ai route, Combined unordered list of all sectors ####
 1. Header "76 02 29 00"
 2. Integer		No. Main Route combined sectors
 3. Header "76 03 02 00"
-4. Integer		?				0
-	1. Integer		?
-	2. Float x3		Left Position X,Z,Y
-	3. Float x3		Right Position X,Z,Y
-	4. Integer		?
+	1. Integer		List index
+	2. 2b Integer	Sector number
+	2. 1b Integer	?
+	2. 1b Integer	Route number
+	3. Float x3		Left Position X,Z,Y
+	4. Float x3		Right Position X,Z,Y
 
 #### Unknown list of 2 values ####
 1. Header "76 03 03 00"

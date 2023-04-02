@@ -8,7 +8,7 @@
 bl_info = {  
     "name": "Import Flatout 2 & UC trackai.bin",  
     "author": "Mazay",  
-    "version": (0, 2),  
+    "version": (0, 3),  
     "blender": (2, 80, 0),  
     "location": "File > Import",  
     "description": "Import trackai.bin. Still work in progress, exports are not possible.",  
@@ -247,16 +247,16 @@ def link_to_collection(obj, collectionName):
             bpy.context.scene.collection.objects.link( obj ) #add without collection, if collection excluded or moved to subcollection.
 
 
-#### AIROUTE #### 
+#### AIROUTE (Race and Safe) #### 
 def make_airoute(get, route, debug):
     get.checkHeader('76 02 29 00')
     num_sec = get.i()   # 75, 12
-    print('',num_sec,'sectors')
+    print(' ',num_sec,'sectors')
 
     csv = ''
     faces = []
-    vertsRoute = []
     vertsSafe = []
+    vertsRace = []
     vertsMiddle = []
     count = 0
 
@@ -280,11 +280,11 @@ def make_airoute(get, route, debug):
 
         L = get.xyz() # Route left vert X,Z,Y
         R = get.xyz() # Route right vert X,Z,Y
-        vertsRoute += L, R,
+        vertsSafe += L, R,
 
-        LSafe = get.xyz() # Safe route left vert X,Z,Y
-        RSafe = get.xyz() # Safe route right vert X,Z,Y
-        vertsSafe += LSafe, RSafe,
+        LRace = get.xyz() # Safe route left vert X,Z,Y
+        RRace = get.xyz() # Safe route right vert X,Z,Y
+        vertsRace += LRace, RRace,
 
         vertsMiddle += [get.xyz()] # Race line X,Z,Y
 
@@ -306,20 +306,16 @@ def make_airoute(get, route, debug):
         get.f() # AY 0
         get.checkHeader('76 02 24 00')
 
-
-    if(route==0): ending = "main"
-    else: ending = "alt"+str(route)
-
-    ai_safe_ob = create_mesh_ob("#ai_safe_"+ending, vertsRoute, faces, meshname="route", show_wire=True, color=(1, 0, 0, 0.15), colorname="red-route", collection="Airoutes")
+    # Create route objects
+    ending = "main" if route==0 else "alt"+str(route)
+    ai_safe_ob = create_mesh_ob("#ai_safe_"+ending, vertsSafe, faces, meshname="route", show_wire=True, color=(1, 0, 0, 0.15), colorname="red-route", collection="Airoutes")
     ai_safe_ob.color = (1,0,0, 1)
-    ai_race_ob = create_mesh_ob("#ai_race_"+ending, vertsSafe, faces, meshname="route", show_wire=True, color=(0, 0.8, 0.1, 1), colorname="green-route", collection="Airoutes")
+    ai_race_ob = create_mesh_ob("#ai_race_"+ending, vertsRace, faces, meshname="route", show_wire=True, color=(0, 0.8, 0.1, 1), colorname="green-route", collection="Airoutes")
     ai_race_ob.color = (0,1,0, 1)
-
 
     ai_middle_ob = create_mesh_ob("#ai_raceline_"+ending, vertsMiddle, '', meshname="route", show_wire=True, color=(1, 1, 1, 1), colorname="midline", collection="Airoutes")
     ai_middle_ob.color = (1,1,1, 1)
 
-    #make_airoute_subsection(get,route) # 75x
     uk1 = get.i()   # 0, 1, 1 `# Start Index Of Mainroute Sector ?
     uk2 = get.i()   # 1056964608 # End Index Of mainroute sector ?
     uk3 = get.i()   # 0
@@ -332,7 +328,7 @@ def make_airoute(get, route, debug):
 def make_startpoints(get):
     get.checkHeader('76 08 30 00')
     num = get.i()  # 8
-    print('\nFound',num,'Startpoints')
+    print('Found',num,'Startpoints')
     for x in range(num):
         position = get.xyz() 
         mx = get.matrix() #3x3 
@@ -359,50 +355,58 @@ def make_checkpoints(get):
         create_mesh_ob("#checkpoint",verts,faces,"checkpoint", collection="Checkpoints")
     get.checkHeader('76 09 02 00') # End
 
-#### AIROUTES Main #### 
-def make_airoute_main(get,debug):
-    vertsRoute = []
-    faces = []
+#### AIROUTES (widest routes) #### 
+def make_airoutes_widest(get,debug):
     get.checkHeader('76 02 29 00')
     num = get.i() #124
-    print('Found',num,'Airoute Main Combined Sectors')
+    print('Found',num,'Airoute combined sectors')
     get.checkHeader('76 03 02 00') # Start
-    uk = get.i() #0
-    count = 0
 
+    routes = {}
+    # Start reading unordered list of all sectors of all routes. 
     for s in range(num):
-        count += 2
-        # Make face between previous and current sector 
-        if(s != 0): #skipping first sector
-            faces += (count-1, count-2, count-4, count-3), 
-
-
-        uk1 = get.i() # 39, 40, 41
+        idx = get.i() # List index 0, 1, 2 ...
+        sector_number, uk1, route_number = get.read('hbb') # Sector Number , 0, Route number
         L = get.xyz() # Route left vert X,Z,Y
         R = get.xyz() # Route right vert X,Z,Y
-        uk2 = get.i() # 39, 40, 41
-        
-        vertsRoute += L, R,
+        # Build dictionary, Group data by route number
+        routes.setdefault(route_number, {}).setdefault(sector_number, [L,R]) # Merge {route: {sector: [vert,vert],}}
 
+        # Create points with names for debug purposes
         if(debug):
-            ob = create_empty_ob(str(s)+'  L ('+str(uk1)+' '+str(uk2)+')', type='SINGLE_ARROW', collection='Airoute Main Sectors (debug mode)')
+            ob = create_empty_ob(str(idx)+'  L ('+str(sector_number)+','+str(uk1)+','+str(route_number)+')', type='SINGLE_ARROW', collection='Airoute Main Sectors (debug mode)')
             ob.location = L
             ob.show_name = True
             ob.show_in_front = True
-            ob = create_empty_ob(str(s)+'  R', type='SINGLE_ARROW', collection='Airoute Main Sectors (debug mode)')
+            ob = create_empty_ob(str(s), type='SINGLE_ARROW', collection='Airoute Main Sectors (debug mode)')
             ob.location = R
             ob.show_name = True
             ob.show_in_front = True
 
-    ai_route_ob = create_mesh_ob("#ai_route_main", vertsRoute, faces, meshname="route", show_wire=True, color=(0, 0, 1, 0), colorname="blue-route", collection="Airoutes Main (wip, broken)")
-    ai_route_ob.color = (0,0,1, 1) #Object color
-
-    get.p = get.p-4 # Seek -4, Something is broken here, fix for now.
     get.checkHeader('76 03 03 00') # End
+
+    # Ordering sector data and creating routes
+    for routeid in routes: 
+        route = dict(sorted(routes[routeid].items())) # Put route sectors in order.
+        faces = []
+        verts = []
+        count = 0
+        for sectorid in route:
+            # Add verts
+            verts += route[sectorid]
+            # Make face between previous and current sector verts
+            count += 2
+            if(sectorid != 0):
+                faces += (count-1, count-2, count-4, count-3), 
+        # Create route object
+        ending = "main" if routeid==0 else "alt"+str(routeid)
+        ai_route_ob = create_mesh_ob("#ai_route_"+ending, verts, faces, meshname="route", show_wire=True, color=(0, 0, 1, 0), colorname="blue-route", collection="Airoutes (broken)")
+        ai_route_ob.color = (0,0,1, 1) #Object color
 
     ### Unknown ###
     num = get.i() # 145
-    uk = get.i()
+    uk1, uk2 = get.read('hh')
+    print('Found',num,'Unknown number pairs, header:',uk1,uk2)
     for i in range(num):
         A = get.i()
         B = get.i()
@@ -421,13 +425,15 @@ def read_trackai_file(get, debug):
     for route in range(num_routes):
         make_airoute(get,route,debug)
 
+    new_collection('Airoutes (broken)') # Create second Ai collection to keep order
+
     get.checkHeader('76 08 28 00')  # Start
     make_startpoints(get)
     make_checkpoints(get)
 
     get.checkHeader('76 08 29 00') # End
 
-    make_airoute_main(get,debug)
+    make_airoutes_widest(get,debug)
 
     get.checkHeader('76 02 28 00') # End
 
