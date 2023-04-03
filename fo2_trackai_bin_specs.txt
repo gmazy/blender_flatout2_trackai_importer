@@ -10,7 +10,7 @@ No. Format		Description		Value
 2. Integer		No. Ai routes
 
 	#### Ai Route ####
-	1. Header "76 02 29 00"
+	1. Start-Header "76 02 29 00"
 	2. Integer		No. Ai sectors
 	
 		#### Ai Sector (Race and Safe Lines) ####
@@ -49,7 +49,7 @@ No. Format		Description		Value
 	5. Integer		?				0
 	6. Integer		?				0
 	7. Integer		?				2
-	8. Header "76 02 26 00"	
+	8. End-Header? "76 02 26 00"	
 
 
 1. Start-Header "76 08 28 00"
@@ -73,24 +73,23 @@ No. Format		Description		Value
 
 #### Widest Ai route, Combined unordered list of all sectors ####
 1. Header "76 02 29 00"
-2. Integer		No. Main Route combined sectors
+2. Integer		No. Combined sectors
 3. Header "76 03 02 00"
+	#### Ai route sector ####
 	1. Integer		List index
-	2. 2b Integer	Sector number
-	2. 1b Integer	?
-	2. 1b Integer	Route number
+	2. 2b Integer		Sector number
+	2. 1b Integer		?
+	2. 1b Integer		Route number
 	3. Float x3		Left Position X,Z,Y
 	4. Float x3		Right Position X,Z,Y
-
-#### Unknown list of 2 values ####
-1. Header "76 03 03 00"
-2. Integer		No. Unknown
-3. Integer		?
+4. Header "76 03 03 00"
+5. Integer		No. Unknown
+6. Header "76 03 04 00"
+	#### Unknown pair of two values ####
 	1. Integer		?
 	2. Integer		?
-	
-1. Header "76 03 05 00"
-1. Header "76 03 01 00"
+7. Header "76 03 05 00"
+8. Header "76 03 01 00"
 
 1. End-Header "76 02 28 00"
 
